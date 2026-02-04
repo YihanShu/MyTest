@@ -1,31 +1,26 @@
 param(
-    [switch]$Persist
+    [Parmeter(Mandatory = $true)]
+    [string]$Name #destination
 )
 
 
-# 读取配置
-$configPath = Join-Path $PSScriptRoot "env_config.json"
-$config = Get-Content $configPath | ConvertFrom-Json
 
+$binPath = (Get-Location).Path
+Write-Host "current PATH:$binPath"
+Write-Host "Destination PATH:$Name"
 
-# 处理每个变量
-foreach ($item in $config) {
-    $name = $item.Name
-    $value = $item.Value
-    
-    if ($name -eq "PATH") {
-        # 特殊处理：追加
-        $current = [Environment]::GetEnvironmentVariable("PATH", "User")
-        if ($current -notlike "*$value*") {
-            $newValue = $current + ";" + $value
-            [Environment]::SetEnvironmentVariable("PATH", $newValue, "User")
-            Write-Host "[$name][$Value] already add"
-        } else {
-            Write-Host "[$name][$Value]path is existed,Pass..."
-        }
+if($Name -eq "PATH"){
+    $currentPath = [Environment]::GetEnvironmentVariable("PATH","User")
+
+    if ($currentPath -notlike "*$binPath*") {
+        $newPath = "$currentPath;$binPath"
+        [Environment]::SetEnvironmentVariable("PATH", $newPath, "User")
+        Write-Host "Success add..."
     } else {
-        # 普通变量：直接设置
-        [Environment]::SetEnvironmentVariable($name, $value, "User")
-        Write-Host "[$name] = $value"
+        Write-Host "Path already exist!!!"
     }
-}
+
+}else{
+        [Environment]::SetEnvironmentVariable($Name, $binPath, "User")
+        Write-Host "Have success add $Name = $binPath"
+}   
