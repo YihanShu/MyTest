@@ -1,26 +1,37 @@
 param(
-    [Parmeter(Mandatory = $true)]
-    [string]$Name #destination
+    [Parameter(Mandatory = $true)]
+    [string]$to #destination
 )
 
 
-
+$flag = $false
 $binPath = (Get-Location).Path
 Write-Host "current PATH:$binPath"
-Write-Host "Destination PATH:$Name"
+Write-Host "Destination PATH:$to"
 
-if($Name -eq "PATH"){
-    $currentPath = [Environment]::GetEnvironmentVariable("PATH","User")
+$users = [System.Environment]::GetEnvironmentVariables("User").Keys
+
+foreach($item in $users)
+{
+    if($to -eq $item){
+    $currentPath = [Environment]::GetEnvironmentVariable($item,"User")
 
     if ($currentPath -notlike "*$binPath*") {
         $newPath = "$currentPath;$binPath"
-        [Environment]::SetEnvironmentVariable("PATH", $newPath, "User")
-        Write-Host "Success add..."
+        [Environment]::SetEnvironmentVariable($to, $newPath, "User")
+        Write-Host "Success add PATH in already enviroment..."
     } else {
         Write-Host "Path already exist!!!"
     }
 
-}else{
-        [Environment]::SetEnvironmentVariable($Name, $binPath, "User")
-        Write-Host "Have success add $Name = $binPath"
-}   
+    $flag = $true
+    }
+}
+
+if($flag -eq $false)
+{
+    [Environment]::SetEnvironmentVariable($to,$binPath,"User")
+    Write-Host "Success add PATH in new enviroment..."
+}
+
+Read-Host
